@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inloggen | De Witwasser</title>
+  <meta name="description" content="Log in bij De Witwasser of maak een account aan. Studentenconcept, geen echte bestellingen.">
+  <meta name="theme-color" content="#FFFFFF">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="icons/favicon.ico" sizes="48x48">
+  <link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="app.css">
+  <script src="config.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"
+          integrity="sha384-K1nraABOP/zFehpLIUksXebbs7jMpB8gYMlb+uhVKZcWT/9Vkq1+qhv6ndC+1Yuz"
+          crossorigin="anonymous" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body data-page="inloggen">
+  <a class="skip-link" href="#inhoud">Naar de inhoud</a>
+
+  <div class="concept-bar" role="note">
+    <p class="container"><strong>Alleen een concept:</strong> hier wordt niets echt witgewassen. Studentenproject voor Bedrijfskunde, Hanzehogeschool Groningen. Er worden geen echte bestellingen aangenomen.</p>
+  </div>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="wordmark" href="index.html" aria-label="De Witwasser, naar de homepage">De Witwasser</a>
+      <nav class="site-nav" aria-label="Hoofdmenu">
+        <ul>
+          <li class="site-nav__login"><a href="index.html">Naar de site</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="inhoud" class="app-main">
+    <div class="container auth">
+      <div class="auth__intro">
+        <p class="eyebrow">Je account</p>
+        <h1 class="heading">Je was, op jouw planning.</h1>
+        <p class="lead">Kies hoe vaak en op welke dag we ophalen, pauzeer als je op vakantie gaat of zeg op. Alles op een plek.</p>
+      </div>
+
+      <div class="panel auth__panel">
+        <p class="notice notice--warning" id="niet-gekoppeld" hidden>
+          De app is nog niet gekoppeld aan de database. Vul de Supabase-gegevens in <code>config.js</code> in (zie de README). Tot die tijd werken inloggen en account aanmaken niet.
+        </p>
+
+        <div class="tabs" role="tablist" aria-label="Inloggen of account aanmaken">
+          <button class="tabs__tab" type="button" role="tab" id="tab-inloggen" aria-controls="paneel-inloggen" aria-selected="true">Inloggen</button>
+          <button class="tabs__tab" type="button" role="tab" id="tab-aanmaken" aria-controls="paneel-aanmaken" aria-selected="false" tabindex="-1">Account aanmaken</button>
+        </div>
+
+        <!-- Inloggen -->
+        <section class="tabs__panel" id="paneel-inloggen" role="tabpanel" aria-labelledby="tab-inloggen">
+          <form class="form" id="inlogformulier" novalidate>
+            <div class="field">
+              <label for="login-id">E-mail of gebruikersnaam</label>
+              <input id="login-id" name="login-id" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="login-id-fout">
+              <p class="field__error" id="login-id-fout" aria-live="polite"></p>
+            </div>
+
+            <div class="field">
+              <label for="login-wachtwoord">Wachtwoord</label>
+              <input id="login-wachtwoord" name="login-wachtwoord" type="password" autocomplete="current-password" required aria-describedby="login-wachtwoord-fout">
+              <p class="field__error" id="login-wachtwoord-fout" aria-live="polite"></p>
+            </div>
+
+            <p class="notice" id="inlog-melding" role="status" hidden></p>
+
+            <button class="btn btn--primary btn--block" type="submit">Inloggen</button>
+
+            <div class="auth__alt">
+              <p class="auth__alt-title">Liever zonder wachtwoord?</p>
+              <button class="btn btn--on-surface btn--block" type="button" id="stuur-inloglink">Stuur me een inloglink</button>
+              <p class="field__hint">De link gaat naar je e-mailadres. Met een gebruikersnaam log je in met je wachtwoord.</p>
+            </div>
+          </form>
+        </section>
+
+        <!-- Account aanmaken -->
+        <section class="tabs__panel" id="paneel-aanmaken" role="tabpanel" aria-labelledby="tab-aanmaken" hidden>
+          <form class="form" id="aanmaakformulier" novalidate>
+            <div class="carried" id="meegenomen" hidden>
+              <p class="carried__title">Uit je aanmelding nemen we mee:</p>
+              <dl class="carried__list" id="meegenomen-lijst"></dl>
+            </div>
+
+            <div class="field">
+              <label for="nieuw-naam">Naam</label>
+              <input id="nieuw-naam" name="nieuw-naam" type="text" autocomplete="given-name" required aria-describedby="nieuw-naam-fout">
+              <p class="field__error" id="nieuw-naam-fout" aria-live="polite"></p>
+            </div>
+
+            <div class="field">
+              <label for="nieuw-email">E-mailadres</label>
+              <input id="nieuw-email" name="nieuw-email" type="email" autocomplete="email" inputmode="email" spellcheck="false" required aria-describedby="nieuw-email-fout">
+              <p class="field__error" id="nieuw-email-fout" aria-live="polite"></p>
+            </div>
+
+            <div class="field">
+              <label for="nieuw-wachtwoord">Wachtwoord</label>
+              <input id="nieuw-wachtwoord" name="nieuw-wachtwoord" type="password" autocomplete="new-password" minlength="8" required aria-describedby="nieuw-wachtwoord-hint nieuw-wachtwoord-fout">
+              <p class="field__hint" id="nieuw-wachtwoord-hint">Minimaal 8 tekens.</p>
+              <p class="field__error" id="nieuw-wachtwoord-fout" aria-live="polite"></p>
+            </div>
+
+            <p class="notice" id="aanmaak-melding" role="status" hidden></p>
+
+            <button class="btn btn--primary btn--block" type="submit">Account aanmaken</button>
+
+            <div class="auth__alt">
+              <p class="auth__alt-title">Liever zonder wachtwoord?</p>
+              <button class="btn btn--on-surface btn--block" type="button" id="aanmaken-met-link">Maak mijn account met een inloglink</button>
+            </div>
+
+            <p class="form__privacy">Wat we met je gegevens doen: <span class="placeholder">[PLACEHOLDER: privacyverklaring]</span></p>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div>
+        <p class="wordmark">De Witwasser</p>
+        <p class="site-footer__text">Ophaal- en bezorgdienst voor je was. Voor studenten in Groningen-stad.</p>
+      </div>
+      <div class="site-footer__meta">
+        <p>Een studentenconcept voor het vak Bedrijfskunde aan de Hanzehogeschool Groningen. Er worden geen betalingen verwerkt.</p>
+        <p><a href="index.html">Terug naar de site</a></p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

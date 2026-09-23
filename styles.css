@@ -82,6 +82,7 @@ body {
 }
 
 img { display: block; max-width: 100%; height: auto; }
+[hidden] { display: none !important; }
 
 h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
 ul[role="list"], ol[role="list"] { list-style: none; padding: 0; }
@@ -253,6 +254,25 @@ a { color: inherit; }
   text-decoration: none;
 }
 .site-nav__link a:active { background: var(--surface); color: var(--navy); }
+
+/* Inloggen blijft ook op mobiel zichtbaar */
+.site-nav__login a {
+  display: inline-block;
+  padding: 0.5rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--navy);
+  text-decoration: none;
+}
+.site-nav__login a:active { background: var(--surface); }
+@media (hover: hover) {
+  .site-nav__login a:hover { background: var(--surface); }
+}
+@media (max-width: 23.5em) {
+  .wordmark { font-size: 1.0625rem; }
+  .site-nav .btn--small { padding-inline: 0.875rem; }
+}
 @media (hover: hover) {
   .site-nav__link a:hover { color: var(--navy); }
 }
@@ -487,6 +507,7 @@ a { color: inherit; }
 
 .field input[type="text"],
 .field input[type="email"],
+.field input[type="password"],
 .field input[type="number"],
 .select select {
   display: block;
@@ -609,7 +630,8 @@ fieldset[data-invalid="true"] .choice input:not(:checked) + span { border-color:
 }
 .success__title:focus { outline: none; }
 .success p { color: var(--muted); }
-.success .btn { margin-top: 1.5rem; }
+.success__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; padding-top: 0.75rem; }
+.signup__tip a { color: var(--navy); font-weight: 600; text-underline-offset: 0.2em; }
 
 /* Placeholders: duidelijk herkenbaar als nog in te vullen */
 

@@ -167,6 +167,18 @@
     /* Geen backend: de aanmelding wordt alleen gelogd */
     console.log('Nieuwe aanmelding De Witwasser:', data);
 
+    /* Meegeven aan "account aanmaken" op inloggen.html (alleen in deze browsertab) */
+    try {
+      sessionStorage.setItem('witwasser-aanmelding', JSON.stringify({
+        naam: data.naam,
+        email: data.email,
+        postcode: data.postcode,
+        frequentie: data.frequentie,
+        ophaaldag: data.ophaaldag,
+        studenten_in_huis: data.studentenInHuis
+      }));
+    } catch (e) { /* opslag geblokkeerd: dan vul je het zelf opnieuw in */ }
+
     success.querySelector('[data-naam]').textContent = ', ' + data.naam;
     swap(form, success, function () {
       success.querySelector('.success__title').focus();

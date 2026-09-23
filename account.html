@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Je account | De Witwasser</title>
+  <meta name="theme-color" content="#FFFFFF">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="icons/favicon.ico" sizes="48x48">
+  <link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="app.css">
+  <script src="config.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"
+          integrity="sha384-K1nraABOP/zFehpLIUksXebbs7jMpB8gYMlb+uhVKZcWT/9Vkq1+qhv6ndC+1Yuz"
+          crossorigin="anonymous" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body data-page="account">
+  <a class="skip-link" href="#inhoud">Naar de inhoud</a>
+
+  <div class="concept-bar" role="note">
+    <p class="container"><strong>Alleen een concept:</strong> hier wordt niets echt witgewassen. Studentenproject voor Bedrijfskunde, Hanzehogeschool Groningen. Er worden geen echte bestellingen aangenomen.</p>
+  </div>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="wordmark" href="index.html" aria-label="De Witwasser, naar de homepage">De Witwasser</a>
+      <nav class="site-nav" aria-label="Hoofdmenu">
+        <ul>
+          <li class="site-nav__login"><a href="index.html">Naar de site</a></li>
+          <li><button class="btn btn--secondary btn--small" type="button" id="uitloggen" hidden>Uitloggen</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="inhoud" class="app-main">
+    <div class="container">
+      <p class="notice notice--warning" id="niet-gekoppeld" hidden>
+        De app is nog niet gekoppeld aan de database. Vul de Supabase-gegevens in <code>config.js</code> in (zie de README).
+      </p>
+      <p class="notice notice--error" id="laadfout" role="alert" hidden></p>
+      <p class="app-loading" id="laden">Je account wordt geladen&hellip;</p>
+
+      <div id="account" hidden>
+        <!-- Overzicht -->
+        <section class="account-head" aria-labelledby="begroeting">
+          <p class="eyebrow">Je account</p>
+          <h1 class="heading" id="begroeting" tabindex="-1">Hoi.</h1>
+          <p class="status-pill" id="status-label"></p>
+          <p class="lead" id="overzicht"></p>
+          <p class="account-head__note" id="overzicht-los" hidden>
+            Een losse ophaling aanvragen: <span class="placeholder">[PLACEHOLDER: hoe je een losse ophaling aanvraagt]</span>
+          </p>
+          <p class="notice notice--info" id="ontbreekt" hidden></p>
+          <p class="account-head__note">Kosten: prijs volgt. Er worden geen betalingen verwerkt.</p>
+        </section>
+
+        <div class="account-grid">
+          <!-- Planning -->
+          <section class="panel account-grid__main" aria-labelledby="planning-titel">
+            <h2 class="panel__title" id="planning-titel">Planning</h2>
+            <form class="form" id="form-planning" novalidate>
+              <fieldset class="field" aria-describedby="frequentie-fout">
+                <legend>Hoe vaak halen we je was op?</legend>
+                <div class="choices">
+                  <label class="choice"><input type="radio" name="frequentie" value="elke week"><span>Elke week</span></label>
+                  <label class="choice"><input type="radio" name="frequentie" value="om de week"><span>Om de week</span></label>
+                  <label class="choice"><input type="radio" name="frequentie" value="los"><span>Los</span></label>
+                </div>
+                <p class="field__error" id="frequentie-fout" aria-live="polite"></p>
+              </fieldset>
+
+              <fieldset class="field" aria-describedby="ophaaldag-fout">
+                <legend>Op welke dag halen we op?</legend>
+                <div class="choices">
+                  <label class="choice"><input type="radio" name="ophaaldag" value="maandag"><span>Maandag</span></label>
+                  <label class="choice"><input type="radio" name="ophaaldag" value="dinsdag"><span>Dinsdag</span></label>
+                  <label class="choice"><input type="radio" name="ophaaldag" value="woensdag"><span>Woensdag</span></label>
+                  <label class="choice"><input type="radio" name="ophaaldag" value="donderdag"><span>Donderdag</span></label>
+                  <label class="choice"><input type="radio" name="ophaaldag" value="vrijdag"><span>Vrijdag</span></label>
+                  <label class="choice"><input type="radio" name="ophaaldag" value="zaterdag"><span>Zaterdag</span></label>
+                </div>
+                <p class="field__error" id="ophaaldag-fout" aria-live="polite"></p>
+              </fieldset>
+
+              <fieldset class="field" aria-describedby="brengdag-fout">
+                <legend>Op welke dag brengen we je was terug?</legend>
+                <div class="choices">
+                  <label class="choice"><input type="radio" name="brengdag" value="maandag"><span>Maandag</span></label>
+                  <label class="choice"><input type="radio" name="brengdag" value="dinsdag"><span>Dinsdag</span></label>
+                  <label class="choice"><input type="radio" name="brengdag" value="woensdag"><span>Woensdag</span></label>
+                  <label class="choice"><input type="radio" name="brengdag" value="donderdag"><span>Donderdag</span></label>
+                  <label class="choice"><input type="radio" name="brengdag" value="vrijdag"><span>Vrijdag</span></label>
+                  <label class="choice"><input type="radio" name="brengdag" value="zaterdag"><span>Zaterdag</span></label>
+                </div>
+                <p class="field__error" id="brengdag-fout" aria-live="polite"></p>
+              </fieldset>
+
+              <fieldset class="field" aria-describedby="brengdagdeel-hint brengdagdeel-fout">
+                <legend>In welk dagdeel brengen we hem terug?</legend>
+                <div class="choices">
+                  <label class="choice"><input type="radio" name="brengdagdeel" value="ochtend"><span>Ochtend</span></label>
+                  <label class="choice"><input type="radio" name="brengdagdeel" value="middag"><span>Middag</span></label>
+                  <label class="choice"><input type="radio" name="brengdagdeel" value="avond"><span>Avond</span></label>
+                </div>
+                <p class="field__hint" id="brengdagdeel-hint">Tijden: <span class="placeholder">[PLACEHOLDER: tijdvakken per dagdeel]</span></p>
+                <p class="field__error" id="brengdagdeel-fout" aria-live="polite"></p>
+              </fieldset>
+
+              <div class="save-row">
+                <button class="btn btn--primary" type="submit">Planning opslaan</button>
+                <p class="save-status" id="planning-status" role="status"></p>
+              </div>
+            </form>
+          </section>
+
+          <!-- Huis -->
+          <section class="panel" aria-labelledby="huis-titel">
+            <h2 class="panel__title" id="huis-titel">Huis</h2>
+            <form class="form" id="form-huis" novalidate>
+              <div class="field">
+                <label for="studenten">Met hoeveel studenten woon je in huis?</label>
+                <input class="input--short" id="studenten" name="studenten" type="number" inputmode="numeric" min="1" max="50" step="1" aria-describedby="studenten-hint studenten-fout">
+                <p class="field__hint" id="studenten-hint">Tel jezelf mee.</p>
+                <p class="field__error" id="studenten-fout" aria-live="polite"></p>
+              </div>
+              <div class="save-row">
+                <button class="btn btn--primary" type="submit">Opslaan</button>
+                <p class="save-status" id="huis-status" role="status"></p>
+              </div>
+            </form>
+          </section>
+
+          <!-- Gegevens en adres -->
+          <section class="panel" aria-labelledby="gegevens-titel">
+            <h2 class="panel__title" id="gegevens-titel">Gegevens en adres</h2>
+            <form class="form" id="form-gegevens" novalidate>
+              <div class="field">
+                <label for="naam">Naam</label>
+                <input id="naam" name="naam" type="text" autocomplete="given-name" maxlength="100" aria-describedby="naam-fout">
+                <p class="field__error" id="naam-fout" aria-live="polite"></p>
+              </div>
+
+              <div class="field">
+                <p class="field__label">E-mailadres</p>
+                <p class="readonly" id="email-weergave"></p>
+                <p class="field__hint">Je e-mailadres wijzigen kan nog niet in dit concept.</p>
+              </div>
+
+              <div class="field-row">
+                <div class="field field-row__grow">
+                  <label for="straat">Straat</label>
+                  <input id="straat" name="straat" type="text" autocomplete="address-line1" maxlength="100" aria-describedby="straat-fout">
+                  <p class="field__error" id="straat-fout" aria-live="polite"></p>
+                </div>
+                <div class="field field-row__small">
+                  <label for="huisnummer">Huisnummer</label>
+                  <input id="huisnummer" name="huisnummer" type="text" autocomplete="address-line2" maxlength="12" aria-describedby="huisnummer-fout">
+                  <p class="field__error" id="huisnummer-fout" aria-live="polite"></p>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="postcode">Postcode</label>
+                <input class="input--short" id="postcode" name="postcode" type="text" autocomplete="postal-code" autocapitalize="characters" spellcheck="false" maxlength="7" placeholder="9742 AB" aria-describedby="postcode-hint postcode-fout">
+                <p class="field__hint" id="postcode-hint">We werken alleen in Groningen-stad.</p>
+                <p class="field__error" id="postcode-fout" aria-live="polite"></p>
+              </div>
+
+              <div class="save-row">
+                <button class="btn btn--primary" type="submit">Gegevens opslaan</button>
+                <p class="save-status" id="gegevens-status" role="status"></p>
+              </div>
+            </form>
+          </section>
+
+          <!-- Pauzeren of opzeggen -->
+          <section class="panel" aria-labelledby="status-titel">
+            <h2 class="panel__title" id="status-titel">Pauzeren of opzeggen</h2>
+
+            <div id="blok-actief" hidden>
+              <form class="form" id="form-pauze" novalidate>
+                <div class="field">
+                  <label for="pauze-tot">Tot en met welke datum wil je pauzeren?</label>
+                  <input class="input--date" id="pauze-tot" name="pauze-tot" type="date" aria-describedby="pauze-tot-hint pauze-tot-fout">
+                  <p class="field__hint" id="pauze-tot-hint">Daarna halen we weer op zoals gepland.</p>
+                  <p class="field__error" id="pauze-tot-fout" aria-live="polite"></p>
+                </div>
+                <div class="save-row">
+                  <button class="btn btn--primary" type="submit">Pauzeer</button>
+                </div>
+              </form>
+
+              <div class="stop">
+                <p class="stop__title">Wil je stoppen?</p>
+                <button class="btn btn--on-surface" type="button" id="opzeggen">Opzeggen</button>
+
+                <div class="confirm" id="bevestig-opzeggen" hidden>
+                  <p class="confirm__title" id="bevestig-titel" tabindex="-1">Weet je zeker dat je wilt opzeggen?</p>
+                  <p>We halen daarna niets meer op. Je kunt je account later weer heropenen.</p>
+                  <p>Opzegtermijn: <span class="placeholder">[PLACEHOLDER: opzegtermijn en voorwaarden]</span></p>
+                  <div class="confirm__actions">
+                    <button class="btn btn--danger" type="button" id="bevestig-ja">Ja, zeg op</button>
+                    <button class="btn btn--on-surface" type="button" id="bevestig-nee">Toch niet</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="blok-gepauzeerd" hidden>
+              <p class="status-text" id="tekst-gepauzeerd"></p>
+              <button class="btn btn--primary" type="button" id="hervatten">Nu hervatten</button>
+            </div>
+
+            <div id="blok-opgezegd" hidden>
+              <p class="status-text" id="tekst-opgezegd"></p>
+              <button class="btn btn--primary" type="button" id="heropenen">Account heropenen</button>
+            </div>
+
+            <p class="save-status" id="status-melding" role="status"></p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div>
+        <p class="wordmark">De Witwasser</p>
+        <p class="site-footer__text">Wat we met je gegevens doen: <span class="placeholder">[PLACEHOLDER: privacyverklaring]</span></p>
+      </div>
+      <div class="site-footer__meta">
+        <p>Een studentenconcept voor het vak Bedrijfskunde aan de Hanzehogeschool Groningen. Er worden geen betalingen verwerkt.</p>
+        <p><a href="index.html">Terug naar de site</a></p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
