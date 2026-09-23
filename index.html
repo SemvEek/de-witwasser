@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>De Witwasser</title>
-  <meta name="description" content="De Witwasser haalt je was op met de rest van je straat, laat hem wassen bij een wasserette in de buurt en brengt hem schoon terug op een vast moment. Voor studenten in Groningen.">
+  <meta name="description" content="De Witwasser haalt je was op met de rest van je straat, laat hem wassen bij een wasserette in de buurt en brengt hem schoon terug op een vast moment. Voor studenten in Groningen-stad.">
   <meta name="theme-color" content="#FFFFFF">
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
@@ -12,12 +12,16 @@
 <body>
   <a class="skip-link" href="#inhoud">Naar de inhoud</a>
 
+  <div class="concept-bar" role="note">
+    <p class="container"><strong>Alleen een concept:</strong> hier wordt niets echt witgewassen. Studentenproject voor Bedrijfskunde, Hanzehogeschool Groningen. Er worden geen echte bestellingen aangenomen.</p>
+  </div>
+
   <header class="site-header" id="top">
     <div class="container site-header__inner">
       <a class="wordmark" href="#top" aria-label="De Witwasser, terug naar boven">De Witwasser</a>
       <nav class="site-nav" aria-label="Hoofdmenu">
         <ul>
-          <li class="site-nav__link"><a href="#probleem">Waarom</a></li>
+          <li class="site-nav__link"><a href="#probleem">Waarom?</a></li>
           <li class="site-nav__link"><a href="#hoe-het-werkt">Hoe het werkt</a></li>
           <li class="site-nav__link"><a href="#eerlijk">Wat het kost</a></li>
           <li><a class="btn btn--primary btn--small" href="#aanmelden">Aanmelden</a></li>
@@ -31,10 +35,10 @@
     <section class="hero" aria-labelledby="hero-titel">
       <div class="container hero__grid">
         <div class="hero__text">
-          <p class="eyebrow" data-enter>Wasservice voor studenten in Groningen</p>
+          <p class="eyebrow" data-enter>Wasservice voor studenten in Groningen-stad</p>
           <h1 id="hero-titel" class="display" data-enter style="--i:1">Wij halen je was op. Jij doet iets anders.</h1>
           <p class="lead" data-enter style="--i:2">
-            Zet je was klaar, wij halen hem op samen met de rest van je straat, laten hem wassen bij een wasserette in de buurt en brengen hem schoon terug. Elke week op hetzelfde moment.
+            Zet je was klaar, wij halen hem op samen met de rest van je straat, laten hem wassen bij een wasserette in de buurt en brengen hem schoon terug. Elke week, om de week of los: je kiest het zelf en past het altijd aan in je account.
           </p>
           <div class="hero__actions" data-enter style="--i:3">
             <a class="btn btn--primary" href="#aanmelden">Meld je aan</a>
@@ -65,7 +69,7 @@
           <li class="card">
             <p class="card__figure">Bezet of kapot</p>
             <h3 class="card__title">De gedeelde machine</h3>
-            <p>Hij draait altijd net voor een huisgenoot. Of hij doet het al weken niet en niemand belt de verhuurder.</p>
+            <p>Er zit altijd net de was van een huisgenoot in. Of hij doet het al weken niet en niemand belt de verhuurder.</p>
           </li>
           <li class="card">
             <p class="card__figure">Een middag weg</p>
@@ -87,7 +91,7 @@
           <li class="step">
             <span class="step__number" aria-hidden="true">1</span>
             <h3 class="step__title">Zet je was klaar</h3>
-            <p>Stop je was in je waszak en zet hem op de ophaaldag bij de voordeur. Meer hoef je niet te doen.</p>
+            <p>Je krijgt een waszak van De Witwasser. Stop je was erin en zet hem op je ophaaldag bij de voordeur. Meer hoef je niet te doen.</p>
           </li>
           <li class="step">
             <span class="step__number" aria-hidden="true">2</span>
@@ -97,9 +101,23 @@
           <li class="step">
             <span class="step__number" aria-hidden="true">3</span>
             <h3 class="step__title">Schoon terug op een vast moment</h3>
-            <p>Een bestaande wasserette in de buurt wast en droogt. Wij brengen je was terug, altijd op hetzelfde moment, zodat je er niet op hoeft te wachten.</p>
+            <p>Een bestaande wasserette in de buurt wast en droogt. Wij brengen je was terug op een vast moment, bijvoorbeeld dinsdag ophalen en donderdag terug. Je ophaaldag en hoe vaak we komen (elke week, om de week of los) kies je zelf en pas je later aan in je account.</p>
           </li>
         </ol>
+
+        <div class="notes">
+          <h3 class="notes__title">Goed om te weten</h3>
+          <dl class="notes__list">
+            <div>
+              <dt>Wasvoorschriften</dt>
+              <dd><span class="placeholder">[PLACEHOLDER: wasvoorschriften: temperatuur, scheiden van bont en wit]</span></dd>
+            </div>
+            <div>
+              <dt>Verlies of schade</dt>
+              <dd><span class="placeholder">[PLACEHOLDER: aansprakelijkheid bij verlies of schade]</span></dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </section>
 
@@ -117,7 +135,7 @@
           <article class="compare__card" aria-labelledby="optie-thuis">
             <h3 id="optie-thuis" class="compare__title">Machine in huis</h3>
             <dl class="compare__list">
-              <div><dt>Kosten</dt><dd>Het laagst</dd></div>
+              <div><dt>Kosten</dt><dd>Het laagst, alleen stroom en zeep</dd></div>
               <div><dt>Jouw tijd</dt><dd>Wachten tot hij vrij is, en daarna nog een keer voor de droger</dd></div>
               <div><dt>Zekerheid</dt><dd>Zolang hij het doet</dd></div>
               <div><dt>Sjouwen</dt><dd>De trap op en af</dd></div>
@@ -135,8 +153,7 @@
           <article class="compare__card compare__card--ours" aria-labelledby="optie-witwasser">
             <h3 id="optie-witwasser" class="compare__title">De Witwasser</h3>
             <dl class="compare__list">
-              <!-- Placeholder: de prijs is nog niet vastgesteld -->
-              <div><dt>Kosten</dt><dd>&euro;0 per week, vast bedrag</dd></div>
+              <div><dt>Kosten</dt><dd>Prijs volgt. Kies uit elke week, om de week of losse ophaling</dd></div>
               <div><dt>Jouw tijd</dt><dd>Twee minuten: je zak klaarzetten</dd></div>
               <div><dt>Zekerheid</dt><dd>Vast ophaal- en brengmoment</dd></div>
               <div><dt>Sjouwen</dt><dd>Niet verder dan je voordeur</dd></div>
@@ -161,7 +178,7 @@
         <div class="signup__intro">
           <h2 id="aanmelden-titel" class="heading">Interesse? Meld je aan.</h2>
           <p class="lead">
-            We starten per wijk, zodra genoeg mensen in dezelfde straten meedoen. Laat je gegevens achter, dan hoor je van ons als we in jouw buurt beginnen.
+            We werken alleen in Groningen-stad en starten per wijk, zodra genoeg mensen in dezelfde straten meedoen. Laat je gegevens achter, dan hoor je van ons als we in jouw buurt beginnen.
           </p>
           <p class="signup__tip">
             Woon je met huisgenoten? Laat ze zich ook aanmelden. Hoe meer aanmeldingen in een straat, hoe eerder we daar langskomen.
@@ -194,24 +211,30 @@
               <div class="choices">
                 <label class="choice"><input type="radio" name="frequentie" value="elke week" required><span>Elke week</span></label>
                 <label class="choice"><input type="radio" name="frequentie" value="om de week"><span>Om de week</span></label>
-                <label class="choice"><input type="radio" name="frequentie" value="af en toe"><span>Af en toe</span></label>
+                <label class="choice"><input type="radio" name="frequentie" value="los"><span>Af en toe</span></label>
               </div>
               <p class="field__error" id="frequentie-fout" aria-live="polite"></p>
             </fieldset>
 
-            <div class="field">
-              <label for="huisgenoten">Hoeveel huisgenoten zouden ook meedoen?</label>
-              <div class="select">
-                <select id="huisgenoten" name="huisgenoten">
-                  <option value="weet ik niet">Weet ik nog niet</option>
-                  <option value="0">Geen</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5+">5 of meer</option>
-                </select>
+            <fieldset class="field" aria-describedby="ophaaldag-hint ophaaldag-fout">
+              <legend>Op welke dag halen we je was op?</legend>
+              <div class="choices">
+                <label class="choice"><input type="radio" name="ophaaldag" value="maandag" required><span>Maandag</span></label>
+                <label class="choice"><input type="radio" name="ophaaldag" value="dinsdag"><span>Dinsdag</span></label>
+                <label class="choice"><input type="radio" name="ophaaldag" value="woensdag"><span>Woensdag</span></label>
+                <label class="choice"><input type="radio" name="ophaaldag" value="donderdag"><span>Donderdag</span></label>
+                <label class="choice"><input type="radio" name="ophaaldag" value="vrijdag"><span>Vrijdag</span></label>
+                <label class="choice"><input type="radio" name="ophaaldag" value="zaterdag"><span>Zaterdag</span></label>
               </div>
+              <p class="field__hint" id="ophaaldag-hint">Later aan te passen in je account.</p>
+              <p class="field__error" id="ophaaldag-fout" aria-live="polite"></p>
+            </fieldset>
+
+            <div class="field">
+              <label for="studenten">Met hoeveel studenten woon je in huis?</label>
+              <input class="input--short" id="studenten" name="studenten" type="number" inputmode="numeric" min="1" max="50" step="1" required aria-describedby="studenten-hint studenten-fout">
+              <p class="field__hint" id="studenten-hint">Tel jezelf mee.</p>
+              <p class="field__error" id="studenten-fout" aria-live="polite"></p>
             </div>
 
             <div class="field">
@@ -223,6 +246,8 @@
             </div>
 
             <button class="btn btn--primary btn--block" type="submit">Aanmelden</button>
+
+            <p class="form__privacy">Wat we met je gegevens doen: <span class="placeholder">[PLACEHOLDER: privacyverklaring]</span></p>
           </form>
 
           <div class="success" id="aanmelding-gelukt" hidden>
@@ -239,7 +264,7 @@
     <div class="container site-footer__inner">
       <div>
         <p class="wordmark">De Witwasser</p>
-        <p class="site-footer__text">Ophaal- en bezorgdienst voor je was. Voor studenten in Groningen.</p>
+        <p class="site-footer__text">Ophaal- en bezorgdienst voor je was. Voor studenten in Groningen-stad.</p>
       </div>
       <div class="site-footer__meta">
         <p>Een studentenconcept voor het vak Bedrijfskunde aan de Hanzehogeschool Groningen.</p>

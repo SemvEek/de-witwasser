@@ -47,8 +47,18 @@
       if (!v) return 'Vul je postcode in, bijvoorbeeld 9742 AB.';
       return postcodePattern.test(v) ? '' : 'Dit is geen geldige postcode. Gebruik vier cijfers en twee letters, zoals 9742 AB.';
     },
-    frequentie: function () {
-      return form.querySelector('input[name="frequentie"]:checked') ? '' : 'Kies hoe vaak je het zou gebruiken.';
+    frequentie: function (group) {
+      return group.value ? '' : 'Kies hoe vaak je het zou gebruiken.';
+    },
+    ophaaldag: function (group) {
+      return group.value ? '' : 'Kies een ophaaldag. Je kunt hem later nog aanpassen.';
+    },
+    studenten: function (f) {
+      if (f.validity.badInput) return 'Vul een getal in, bijvoorbeeld 5.';
+      var v = f.value.trim();
+      if (!v) return 'Vul in met hoeveel studenten je in huis woont.';
+      if (!/^[0-9]+$/.test(v) || Number(v) < 1) return 'Vul een heel getal in van 1 of meer. Tel jezelf mee.';
+      return Number(v) <= 50 ? '' : 'Vul een getal in tot en met 50.';
     },
     toestemming: function (f) {
       return f.checked ? '' : 'Zonder je toestemming kunnen we je niet mailen.';
@@ -59,12 +69,14 @@
     return document.getElementById(name + '-fout');
   }
 
+  var radioGroups = ['frequentie', 'ophaaldag'];
+
   function validate(name) {
     var field = form.elements[name];
     var message = rules[name](field);
     errorEl(name).textContent = message;
-    if (name === 'frequentie') {
-      form.querySelector('fieldset').setAttribute('data-invalid', message ? 'true' : 'false');
+    if (radioGroups.indexOf(name) !== -1) {
+      field[0].closest('fieldset').setAttribute('data-invalid', message ? 'true' : 'false');
     } else if (message) {
       field.setAttribute('aria-invalid', 'true');
     } else {
@@ -79,7 +91,7 @@
   }
 
   /* Inline valideren: bij verlaten van een veld, en direct opnieuw zodra een fout is hersteld */
-  ['naam', 'email', 'postcode', 'toestemming'].forEach(function (name) {
+  ['naam', 'email', 'postcode', 'studenten', 'toestemming'].forEach(function (name) {
     var field = form.elements[name];
     field.addEventListener('blur', function () {
       if (name === 'postcode') field.value = formatPostcode(field.value);
@@ -90,8 +102,10 @@
       if (field.getAttribute('aria-invalid') === 'true') validate(name);
     });
   });
-  form.querySelectorAll('input[name="frequentie"]').forEach(function (radio) {
-    radio.addEventListener('change', function () { validate('frequentie'); });
+  radioGroups.forEach(function (name) {
+    form.querySelectorAll('input[name="' + name + '"]').forEach(function (radio) {
+      radio.addEventListener('change', function () { validate(name); });
+    });
   });
 
   function animateIn(el) {
@@ -107,7 +121,10 @@
   }
 
   function swap(from, to, afterSwap) {
+    var swapped = false;
     function done() {
+      if (swapped) return;
+      swapped = true;
       from.hidden = true;
       to.hidden = false;
       animateIn(to);
@@ -116,20 +133,22 @@
     if (!from.animate) return done();
     var out = from.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-out' });
     out.onfinish = done;
+    /* Terugval als de animatie niet afloopt, bijvoorbeeld in een achtergrondtab */
+    setTimeout(done, 300);
   }
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
     form.elements.postcode.value = formatPostcode(form.elements.postcode.value);
 
-    var order = ['naam', 'email', 'postcode', 'frequentie', 'toestemming'];
+    var order = ['naam', 'email', 'postcode', 'frequentie', 'ophaaldag', 'studenten', 'toestemming'];
     var firstInvalid = null;
     order.forEach(function (name) {
       if (!validate(name) && !firstInvalid) firstInvalid = name;
     });
     if (firstInvalid) {
-      var target = firstInvalid === 'frequentie'
-        ? form.querySelector('input[name="frequentie"]')
+      var target = radioGroups.indexOf(firstInvalid) !== -1
+        ? form.elements[firstInvalid][0]
         : form.elements[firstInvalid];
       target.focus();
       return;
@@ -139,8 +158,9 @@
       naam: form.elements.naam.value.trim(),
       email: form.elements.email.value.trim(),
       postcode: form.elements.postcode.value,
-      frequentie: form.querySelector('input[name="frequentie"]:checked').value,
-      huisgenoten: form.elements.huisgenoten.value,
+      frequentie: form.elements.frequentie.value,
+      ophaaldag: form.elements.ophaaldag.value,
+      studentenInHuis: Number(form.elements.studenten.value),
       toestemming: form.elements.toestemming.checked,
       aangemeldOp: new Date().toISOString()
     };
@@ -156,7 +176,7 @@
   again.addEventListener('click', function () {
     form.reset();
     form.querySelectorAll('[aria-invalid]').forEach(function (f) { f.removeAttribute('aria-invalid'); });
-    form.querySelector('fieldset').removeAttribute('data-invalid');
+    form.querySelectorAll('fieldset').forEach(function (f) { f.removeAttribute('data-invalid'); });
     form.querySelectorAll('.field__error').forEach(function (e) { e.textContent = ''; });
     swap(success, form, function () {
       form.elements.naam.focus();
