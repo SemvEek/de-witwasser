@@ -21,7 +21,20 @@ Live: https://semveek.github.io/de-witwasser/
 
 Geen build-stap. De app gebruikt [Supabase](https://supabase.com) (gratis plan) voor inloggen en opslag.
 
-## Supabase instellen (eenmalig)
+## Demo-modus (nu actief)
+
+Zolang `config.js` nog placeholders bevat, draait de app zonder database:
+
+- Log in op `inloggen.html` met gebruikersnaam **Sem** en wachtwoord **witwassen**.
+- Groepsgenoten kunnen er ook een eigen demo-account aanmaken.
+- Alles wordt alleen in de browser van de bezoeker bewaard (localStorage). Een ander apparaat of een andere browser begint dus leeg, behalve het account van Sem.
+- Inloglinks per mail werken in de demo-modus niet en zijn verborgen.
+
+Het demo-wachtwoord staat openbaar in `config.js`. Het beschermt niets: gebruik het niet voor een echt account.
+
+Zodra je de Supabase-gegevens invult, schakelt de app vanzelf over op de echte database.
+
+## Supabase instellen (later, eenmalig)
 
 1. **Project aanmaken.** Maak een account op supabase.com (inloggen met GitHub kan). Klik op *New project*, kies regio *Frankfurt (eu-central-1)* en bewaar het databasewachtwoord buiten deze repo.
 2. **Database.** Ga naar *SQL Editor*, plak de inhoud van `supabase/schema.sql` en klik op *Run*.

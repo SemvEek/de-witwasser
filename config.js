@@ -9,5 +9,12 @@ window.WITWASSER_CONFIG = {
      Het adres hoort bij een gebruiker die je zelf aanmaakt in Supabase (Authentication > Users). */
   gebruikersnamen: {
     sem: 'sem@example.com'
-  }
+  },
+
+  /* Demo-modus: zolang supabaseUrl en supabaseAnonKey hierboven placeholders zijn, bewaart de app
+     alles alleen in de browser van de bezoeker. Deze accounts bestaan dan in elke browser.
+     Dit wachtwoord beschermt niets en is openbaar: gebruik het niet voor een echt account. */
+  demoAccounts: [
+    { email: 'sem@example.com', wachtwoord: 'witwassen', naam: 'Sem' }
+  ]
 };

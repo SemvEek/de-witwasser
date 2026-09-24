@@ -16,12 +16,143 @@
       cfg.supabaseAnonKey.indexOf('[PLACEHOLDER') === -1;
   }
 
+  /* Zonder ingevulde config draait de app in demo-modus: alles blijft in deze browser */
+  var demo = !isGekoppeld();
   var db = null;
-  if (isGekoppeld() && window.supabase) {
+  if (demo) {
+    db = maakDemoClient();
+  } else if (window.supabase) {
     db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
       /* implicit: een magic link werkt ook als je hem in een andere browser opent */
       auth: { flowType: 'implicit', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
     });
+  }
+
+  /* Demo-modus: bootst het deel van de Supabase-client na dat de app gebruikt.
+     Net als met de echte database ziet een gebruiker alleen zijn eigen profiel. */
+  function maakDemoClient() {
+    var SLEUTEL = 'witwasser-demo';
+    var DAGEN = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
+    var FREQUENTIES = ['elke week', 'om de week', 'los'];
+    var geheugen = null;
+
+    function nieuwProfiel(id, email, m) {
+      m = m || {};
+      var pc = String(m.postcode || '').replace(/\s+/g, '').toUpperCase();
+      var st = Number(m.studenten_in_huis);
+      var nu = new Date().toISOString();
+      return {
+        id: id,
+        email: email,
+        naam: m.naam ? String(m.naam).trim().slice(0, 100) : null,
+        straat: null,
+        huisnummer: null,
+        postcode: /^[1-9][0-9]{3}[A-Z]{2}$/.test(pc) ? pc.slice(0, 4) + ' ' + pc.slice(4) : null,
+        frequentie: FREQUENTIES.indexOf(m.frequentie) !== -1 ? m.frequentie : null,
+        ophaaldag: DAGEN.indexOf(m.ophaaldag) !== -1 ? m.ophaaldag : null,
+        brengdag: null,
+        brengdagdeel: null,
+        studenten_in_huis: st >= 1 && st <= 50 && st % 1 === 0 ? st : null,
+        status: 'actief',
+        gepauzeerd_tot: null,
+        opgezegd_op: null,
+        aangemaakt_op: nu,
+        bijgewerkt_op: nu
+      };
+    }
+
+    function lees() {
+      var st = null;
+      try { st = JSON.parse(localStorage.getItem(SLEUTEL) || 'null'); } catch (e) { st = geheugen; }
+      st = st || { gebruikers: {}, profielen: {}, sessie: null };
+      /* Demo-accounts uit config.js altijd beschikbaar maken */
+      (cfg.demoAccounts || []).forEach(function (a) {
+        var email = String(a.email).toLowerCase();
+        if (st.gebruikers[email]) return;
+        var id = 'demo-' + email;
+        st.gebruikers[email] = { id: id, wachtwoord: a.wachtwoord };
+        st.profielen[id] = nieuwProfiel(id, email, { naam: a.naam });
+      });
+      return st;
+    }
+
+    function schrijf(st) {
+      geheugen = st;
+      try { localStorage.setItem(SLEUTEL, JSON.stringify(st)); } catch (e) { /* alleen in geheugen */ }
+    }
+
+    function antwoord(data, error) { return Promise.resolve({ data: data, error: error || null }); }
+
+    return {
+      auth: {
+        getSession: function () {
+          var st = lees();
+          return antwoord({ session: st.sessie ? { user: st.sessie } : null });
+        },
+        onAuthStateChange: function () {
+          return { data: { subscription: { unsubscribe: function () {} } } };
+        },
+        signInWithPassword: function (o) {
+          var st = lees();
+          var email = String(o.email).toLowerCase();
+          var g = st.gebruikers[email];
+          if (!g || g.wachtwoord !== o.password) {
+            return antwoord(null, { code: 'invalid_credentials', message: 'Invalid login credentials' });
+          }
+          st.sessie = { id: g.id, email: email };
+          schrijf(st);
+          return antwoord({ session: { user: st.sessie } });
+        },
+        signUp: function (o) {
+          var st = lees();
+          var email = String(o.email).toLowerCase();
+          if (st.gebruikers[email]) {
+            return antwoord(null, { code: 'user_already_exists', message: 'User already registered' });
+          }
+          var id = 'demo-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+          st.gebruikers[email] = { id: id, wachtwoord: o.password };
+          st.profielen[id] = nieuwProfiel(id, email, o.options && o.options.data);
+          st.sessie = { id: id, email: email };
+          schrijf(st);
+          return antwoord({ session: { user: st.sessie } });
+        },
+        signInWithOtp: function () {
+          return antwoord(null, { code: 'demo_modus', message: 'Demo mode' });
+        },
+        signOut: function () {
+          var st = lees();
+          st.sessie = null;
+          schrijf(st);
+          return antwoord({});
+        }
+      },
+      from: function () {
+        var actie = 'select';
+        var gegevens = null;
+        function uitvoeren() {
+          var st = lees();
+          if (!st.sessie) return antwoord(null, { message: 'JWT expired' });
+          var id = st.sessie.id;
+          if (actie === 'insert') st.profielen[id] = nieuwProfiel(id, st.sessie.email, gegevens);
+          if (actie === 'update') {
+            if (!st.profielen[id]) return antwoord(null, { message: 'Profiel niet gevonden' });
+            Object.assign(st.profielen[id], gegevens, { bijgewerkt_op: new Date().toISOString() });
+          }
+          if (actie !== 'select') schrijf(st);
+          var p = st.profielen[id];
+          return antwoord(p ? Object.assign({}, p) : null);
+        }
+        var bouwer = {
+          select: function () { return bouwer; },
+          eq: function () { return bouwer; },
+          insert: function (x) { actie = 'insert'; gegevens = x; return bouwer; },
+          update: function (x) { actie = 'update'; gegevens = x; return bouwer; },
+          maybeSingle: uitvoeren,
+          single: uitvoeren
+        };
+        return bouwer;
+      }
+    };
   }
 
   /* Hulpfuncties */
@@ -102,6 +233,9 @@
     if (code === 'user_already_exists' || /already (been )?registered/i.test(m)) {
       return 'Er bestaat al een account met dit e-mailadres. Log in via het tabblad Inloggen.';
     }
+    if (code === 'demo_modus') {
+      return 'Inloglinks werken pas als de app aan een database gekoppeld is. Log in met een wachtwoord.';
+    }
     if (code === 'otp_disabled' || /signups not allowed/i.test(m)) {
       return 'We kennen dit e-mailadres niet. Maak eerst een account aan.';
     }
@@ -138,6 +272,13 @@
     if (el) el.hidden = false;
   }
 
+  /* Demo-modus: melding tonen en inloglinks verbergen (die hebben een mailserver nodig) */
+  function toonDemo() {
+    var el = $('demo-melding');
+    if (el) el.hidden = false;
+    document.querySelectorAll('.auth__alt').forEach(function (blok) { blok.hidden = true; });
+  }
+
   /* Inloggen en account aanmaken */
 
   function initInloggen() {
@@ -150,6 +291,7 @@
       document.querySelectorAll('.tabs__panel .btn').forEach(function (b) { b.disabled = true; });
       return;
     }
+    if (demo) toonDemo();
 
     /* Al ingelogd: direct door naar je account */
     db.auth.getSession().then(function (r) {
@@ -334,6 +476,7 @@
       $('laden').hidden = true;
       return;
     }
+    if (demo) toonDemo();
 
     db.auth.onAuthStateChange(function (event) {
       if (event === 'SIGNED_OUT' && !bezigMetUitloggen) window.location.replace('inloggen.html');
