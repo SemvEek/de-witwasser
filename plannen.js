@@ -6,13 +6,15 @@
   'use strict';
 
   /* Prijzen: het abonnement (elke week ophalen) kost € 13,25 per maand, zoals in de presentatie.
-     Een losse wasbeurt en een extra waszak kosten ook € 13,25. */
+     Een losse wasbeurt kost ook € 13,25. */
   var PRIJS_ABONNEMENT = 13.25;
   var PRIJS_LOS = 13.25;
-  var PRIJS_EXTRA_ZAK = 13.25;
-  /* Aanname: de presentatie noemt strijken als toeslag, maar geen bedrag. */
+  /* Aannames: de presentatie noemt extra was en strijken als toeslag, maar geen bedrag. */
+  var PRIJS_EXTRA_ZAK = 2.5;
   var PRIJS_STRIJKEN = 2.5;
   var MAX_EXTRA_ZAKKEN = 3;
+  /* Zoveel stuks passen in een waszak. Zit hij vol, dan komt er vanzelf een extra zak bij. */
+  var MAX_STUKS_PER_ZAK = 25;
 
   var TIJDVAKKEN = [[9, 11], [11, 13], [13, 15], [15, 17], [17, 19], [19, 21]];
   var PLANBARE_DAGEN = 14;        /* kalenderdagen vooruit; op zondag rijden we niet */
@@ -44,10 +46,11 @@
     '',
     '      <div class="extras">',
     '        <h3 class="extras__title">Extra\'s</h3>',
+    '        <div class="fill" id="zak-vulling" aria-live="polite"></div>',
     '        <div class="extra">',
     '          <div class="extra__text">',
     '            <p class="extra__name">Extra waszak</p>',
-    '            <p class="extra__hint">Meer was dan in een zak past. <span id="prijs-zak"></span> per zak.</p>',
+    '            <p class="extra__hint" id="zak-uitleg"></p>',
     '          </div>',
     '          <div class="stepper-input" role="group" aria-label="Aantal extra waszakken">',
     '            <button type="button" class="stepper-input__btn" id="zak-min" aria-label="Eén extra waszak minder">&minus;</button>',
@@ -389,7 +392,8 @@
       eigenTeller: 0,
       actief: null,
       overgeslagen: false,
-      extraZakken: 0,
+      extraGekozen: 0,  /* extra zakken die je zelf toevoegt; volle zakken tellen daarbovenop */
+      zakVol: false,    /* net een zak bijgekomen omdat de vorige vol zat */
       strijken: false,
       ophalen: null,
       terug: null,
@@ -410,8 +414,18 @@
   function aantalStuks() {
     return regels().reduce(function (s, id) { return s + state.items[id].aantal; }, 0);
   }
+  /* Zakken die nodig zijn voor wat je hebt gekozen. Niet geteld: een zak. */
+  function zakkenNodig() {
+    return Math.max(1, Math.ceil(aantalStuks() / MAX_STUKS_PER_ZAK));
+  }
+  function extraZakken() {
+    return Math.max(state.extraGekozen, zakkenNodig() - 1);
+  }
+  function maxStuks() {
+    return (1 + MAX_EXTRA_ZAKKEN) * MAX_STUKS_PER_ZAK;
+  }
   function extras() {
-    return state.extraZakken * PRIJS_EXTRA_ZAK + (state.strijken ? PRIJS_STRIJKEN : 0);
+    return extraZakken() * PRIJS_EXTRA_ZAK + (state.strijken ? PRIJS_STRIJKEN : 0);
   }
   /* Abonnement: vast bedrag per maand, extra's per wasbeurt. Een keer: alles in een bedrag. */
   function prijsTekst(kort) {
@@ -611,10 +625,26 @@
   function wijzig(id, delta) {
     var r = state.items[id];
     if (!r) {
-      r = state.items[id] = { aantal: 0, kleur: null, tags: [] };
+      r = state.items[id] = { aantal: 0, kleuren: [], tags: [] };
+    }
+    if (delta > 0 && aantalStuks() >= maxStuks()) {
+      var vol = 'Er passen maximaal ' + maxStuks() + ' stuks in ' + (1 + MAX_EXTRA_ZAKKEN) +
+        ' waszakken. Plan de rest in een tweede wasbeurt.';
+      $('stap1-fout').textContent = vol;
+      /* Ook direct onder de tegels, waar je net tikte */
+      var details = $('details');
+      var oud = details.querySelector('.details__vol');
+      if (oud) oud.remove();
+      details.insertBefore(maak('p', 'field__error details__vol', vol), details.firstChild);
+      if (tegels[id] && tegels[id].tegel.animate && !reducedMotion.matches) {
+        tegels[id].tegel.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }], { duration: 240 });
+      }
+      return;
     }
     if (state.volgorde.indexOf(id) === -1) state.volgorde.push(id);
-    r.aantal = Math.max(0, Math.min(99, r.aantal + delta));
+    var zakkenVoor = extraZakken();
+    r.aantal = Math.max(0, r.aantal + delta);
+    state.zakVol = delta > 0 && extraZakken() > zakkenVoor;
     if (r.aantal > 0) {
       state.actief = id;
       state.overgeslagen = false;
@@ -661,7 +691,7 @@
     });
     box.appendChild(tags);
 
-    var kleurKop = maak('p', 'details__sub', 'Kleur, zodat we wit, licht, donker en bont apart wassen');
+    var kleurKop = maak('p', 'details__sub', 'Kleuren, zodat we wit, licht, donker en bont apart wassen. Je kunt er meer kiezen.');
     kleurKop.id = 'kleur-kop';
     box.appendChild(kleurKop);
     var kleuren = maak('div', 'swatches');
@@ -670,14 +700,13 @@
     WASKLEUREN.forEach(function (k) {
       var b = maak('button', 'swatch swatch--' + k.id);
       b.type = 'button';
-      b.setAttribute('aria-pressed', String(r.kleur === k.id));
+      b.setAttribute('aria-pressed', String(r.kleuren.indexOf(k.id) !== -1));
       b.appendChild(maak('span', 'swatch__dot'));
       b.appendChild(maak('span', 'swatch__name', k.naam));
       b.addEventListener('click', function () {
-        r.kleur = r.kleur === k.id ? null : k.id;
-        kleuren.querySelectorAll('.swatch').forEach(function (s, i) {
-          s.setAttribute('aria-pressed', String(WASKLEUREN[i].id === r.kleur));
-        });
+        var i = r.kleuren.indexOf(k.id);
+        if (i === -1) r.kleuren.push(k.id); else r.kleuren.splice(i, 1);
+        b.setAttribute('aria-pressed', String(i === -1));
         renderSamenvatting();
       });
       kleuren.appendChild(b);
@@ -687,8 +716,10 @@
 
   function regelOmschrijving(id) {
     var r = state.items[id];
-    var delen = [];
-    if (r.kleur) delen.push(WASKLEUREN.filter(function (k) { return k.id === r.kleur; })[0].naam);
+    /* Kleuren in de vaste volgorde wit, licht, donker, bont */
+    var kleuren = WASKLEUREN.filter(function (k) { return r.kleuren.indexOf(k.id) !== -1; })
+      .map(function (k) { return k.naam; });
+    var delen = kleuren.length ? [kleuren.join(', ')] : [];
     return delen.concat(r.tags).join(' · ');
   }
 
@@ -729,7 +760,8 @@
     var abo = soort() === 'abonnement';
     if (abo) prijsRegel('Abonnement, elke week', euro(PRIJS_ABONNEMENT) + ' per maand');
     else prijsRegel('Losse wasbeurt (1 waszak)', euro(PRIJS_LOS));
-    if (state.extraZakken) prijsRegel('Extra waszak × ' + state.extraZakken, euro(state.extraZakken * PRIJS_EXTRA_ZAK));
+    var extra = extraZakken();
+    if (extra) prijsRegel('Extra waszak × ' + extra, euro(extra * PRIJS_EXTRA_ZAK));
     if (state.strijken) prijsRegel('Strijken', euro(PRIJS_STRIJKEN));
     $('sum-totaal').textContent = prijsTekst();
 
@@ -739,24 +771,62 @@
 
     var n = aantalStuks();
     $('balk-aantal').textContent = n
-      ? n + (n === 1 ? ' stuk' : ' stuks') + (state.extraZakken ? ', ' + (1 + state.extraZakken) + ' zakken' : '')
+      ? n + (n === 1 ? ' stuk' : ' stuks') + (extra ? ', ' + (1 + extra) + ' zakken' : '')
       : state.overgeslagen ? 'Wij tellen het' : 'Nog niets gekozen';
     $('balk-totaal').textContent = prijsTekst(true);
+    renderZakken();
+  }
+
+  /* Vulmeter per zak en de knoppen voor extra zakken */
+  function renderZakken() {
+    var extra = extraZakken();
+    var zakken = 1 + extra;
+    var n = aantalStuks();
+    $('zak-aantal').textContent = extra;
+    $('zak-min').disabled = extra <= zakkenNodig() - 1;
+    $('zak-plus').disabled = extra >= MAX_EXTRA_ZAKKEN;
+
+    var box = $('zak-vulling');
+    box.textContent = '';
+    var tekst = maak('p', 'fill__text');
+    if (n) {
+      tekst.appendChild(maak('strong', null, n + ' van ' + zakken * MAX_STUKS_PER_ZAK + ' stuks'));
+      tekst.appendChild(document.createTextNode(' in ' + zakken + (zakken === 1 ? ' waszak' : ' waszakken')));
+    } else {
+      tekst.textContent = 'In een waszak passen ' + MAX_STUKS_PER_ZAK + ' stuks.';
+    }
+    box.appendChild(tekst);
+    var balken = maak('div', 'fill__bags');
+    balken.setAttribute('aria-hidden', 'true');
+    for (var i = 0; i < zakken; i++) {
+      var inZak = Math.max(0, Math.min(MAX_STUKS_PER_ZAK, n - i * MAX_STUKS_PER_ZAK));
+      var zak = maak('span', 'fill__bag' + (inZak === MAX_STUKS_PER_ZAK ? ' is-vol' : ''));
+      var balk = maak('span', 'fill__bar');
+      balk.style.width = (inZak / MAX_STUKS_PER_ZAK * 100) + '%';
+      zak.appendChild(balk);
+      balken.appendChild(zak);
+    }
+    box.appendChild(balken);
+    if (state.zakVol) {
+      box.appendChild(maak('p', 'fill__note', 'Je zak zit vol. We hebben een extra waszak toegevoegd (+ ' + euro(PRIJS_EXTRA_ZAK) + ').'));
+    }
   }
 
   function koppelExtras() {
-    $('prijs-zak').textContent = euro(PRIJS_EXTRA_ZAK);
+    $('zak-uitleg').textContent = 'Zit je zak vol (' + MAX_STUKS_PER_ZAK + ' stuks), dan komt er vanzelf een bij. + ' + euro(PRIJS_EXTRA_ZAK) + ' per zak.';
     $('prijs-strijken').textContent = '+ ' + euro(PRIJS_STRIJKEN);
-    function zakken(delta) {
-      state.extraZakken = Math.max(0, Math.min(MAX_EXTRA_ZAKKEN, state.extraZakken + delta));
-      $('zak-aantal').textContent = state.extraZakken;
-      $('zak-min').disabled = state.extraZakken === 0;
-      $('zak-plus').disabled = state.extraZakken === MAX_EXTRA_ZAKKEN;
+    $('zak-min').addEventListener('click', function () {
+      /* Terug tot wat nodig is: dan weer vanzelf, zodat de zak verdwijnt als je stuks weghaalt */
+      var nieuw = Math.max(zakkenNodig() - 1, extraZakken() - 1);
+      state.extraGekozen = nieuw > zakkenNodig() - 1 ? nieuw : 0;
+      state.zakVol = false;
       renderSamenvatting();
-    }
-    $('zak-min').addEventListener('click', function () { zakken(-1); });
-    $('zak-plus').addEventListener('click', function () { zakken(1); });
-    zakken(0);
+    });
+    $('zak-plus').addEventListener('click', function () {
+      state.extraGekozen = Math.min(MAX_EXTRA_ZAKKEN, extraZakken() + 1);
+      state.zakVol = false;
+      renderSamenvatting();
+    });
     $('strijken').addEventListener('click', function () {
       state.strijken = !state.strijken;
       this.setAttribute('aria-checked', String(state.strijken));
@@ -1106,7 +1176,7 @@
       terug: state.terug,
       stuks: aantalStuks(),
       sportStuks: sportStuks,
-      zakken: 1 + state.extraZakken,
+      zakken: 1 + extraZakken(),
       strijken: state.strijken,
       prijs: prijsTekst(),
       abonnement: soort() === 'abonnement',
@@ -1287,9 +1357,6 @@
     $('gegevens').reset();
     $('gegevens').querySelectorAll('[aria-invalid]').forEach(function (v) { veldFout(v, ''); });
     $('strijken').setAttribute('aria-checked', 'false');
-    $('zak-aantal').textContent = '0';
-    $('zak-min').disabled = true;
-    $('zak-plus').disabled = false;
     $('terug-gewist').hidden = true;
     ['stap1-fout', 'stap2-fout', 'stap3-fout'].forEach(function (id) { $(id).textContent = ''; });
     kiesCategorie(cat);

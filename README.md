@@ -29,8 +29,8 @@ Link: https://semveek.github.io/de-witwasser/plannen.html
 - Geen inloggen nodig. Alles gebeurt in de browsertab van de bezoeker: er wordt niets opgeslagen (geen localStorage, sessionStorage of cookies) en niets verstuurd. Een hele klas kan dus tegelijk plannen zonder elkaar te storen. Sluit je de pagina, dan is alles weg.
 - De tijdvakken zijn nep: twee uur per vak, van 09:00 tot 21:00, maandag tot en met zaterdag. Welke vakken vol zijn, volgt vast uit de datum, dus iedereen ziet dezelfde volle vakken.
 - Ophalen kan op zijn vroegst 2 uur vooruit. Terugbrengen kan op zijn vroegst 24 uur na het einde van het ophaaltijdvak en uiterlijk 6 dagen erna. Voorbeeld: dinsdag 19:00 tot 21:00 ophalen, dan kunnen maandag, dinsdag en woensdag niet en is donderdag de eerste dag.
-- Na een wijziging in css of js: verhoog `?v=2` in de html-bestanden, anders laden browsers soms de oude versie.
-- Instellingen staan bovenaan `plannen.js`. De prijs voor strijken (€ 2,50) is een aanname: die staat niet in de presentatie.
+- Na een wijziging in css of js: verhoog `?v=3` in de html-bestanden, anders laden browsers soms de oude versie.
+- Instellingen staan bovenaan `plannen.js`. De prijzen voor een extra waszak en strijken (allebei € 2,50) zijn aannames: die staan niet in de presentatie. In een waszak passen 25 stuks (`MAX_STUKS_PER_ZAK`); zit hij vol, dan komt er vanzelf een extra zak bij, tot maximaal 4 zakken.
 
 ## Demo-modus (nu actief)
 
