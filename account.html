@@ -10,13 +10,15 @@
   <link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="app.css">
-  <script src="config.js" defer></script>
+  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="app.css?v=2">
+  <link rel="stylesheet" href="plannen.css?v=2">
+  <script src="config.js?v=2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"
           integrity="sha384-K1nraABOP/zFehpLIUksXebbs7jMpB8gYMlb+uhVKZcWT/9Vkq1+qhv6ndC+1Yuz"
           crossorigin="anonymous" defer></script>
-  <script src="app.js" defer></script>
+  <script src="plannen.js?v=2" defer></script>
+  <script src="app.js?v=2" defer></script>
 </head>
 <body data-page="account">
   <a class="skip-link" href="#inhoud">Naar de inhoud</a>
@@ -55,72 +57,19 @@
           <h1 class="heading" id="begroeting" tabindex="-1">Hoi.</h1>
           <p class="status-pill" id="status-label"></p>
           <p class="lead" id="overzicht"></p>
-          <p class="account-head__note" id="overzicht-los" hidden>
-            Een losse ophaling aanvragen: <span class="placeholder">[PLACEHOLDER: hoe je een losse ophaling aanvraagt]</span>
-          </p>
           <p class="notice notice--info" id="ontbreekt" hidden></p>
-          <p class="account-head__note">Kosten: prijs volgt. Er worden geen betalingen verwerkt.</p>
+          <p class="account-head__note">Kosten: &euro; 13,25 per maand met het abonnement, een losse wasbeurt kost &euro; 13,25. Er worden geen betalingen verwerkt.</p>
+        </section>
+
+        <!-- Planning: dezelfde planner als op plannen.html (plannen.js) -->
+        <section class="account-planning" id="planning" aria-labelledby="planning-titel">
+          <h2 class="heading account-planning__title" id="planning-titel">Planning</h2>
+          <p class="lead">Kies wat er in je zak zit, wanneer we hem ophalen en wanneer je hem terugkrijgt. Met het abonnement halen we daarna elke week op hetzelfde moment op.</p>
+          <p class="notice notice--info" id="planning-opgezegd" hidden>Je hebt opgezegd. Heropen je account onderaan deze pagina om weer te plannen.</p>
+          <div data-planner data-account></div>
         </section>
 
         <div class="account-grid">
-          <!-- Planning -->
-          <section class="panel account-grid__main" aria-labelledby="planning-titel">
-            <h2 class="panel__title" id="planning-titel">Planning</h2>
-            <form class="form" id="form-planning" novalidate>
-              <fieldset class="field" aria-describedby="frequentie-fout">
-                <legend>Hoe vaak halen we je was op?</legend>
-                <div class="choices">
-                  <label class="choice"><input type="radio" name="frequentie" value="elke week"><span>Elke week</span></label>
-                  <label class="choice"><input type="radio" name="frequentie" value="om de week"><span>Om de week</span></label>
-                  <label class="choice"><input type="radio" name="frequentie" value="los"><span>Los</span></label>
-                </div>
-                <p class="field__error" id="frequentie-fout" aria-live="polite"></p>
-              </fieldset>
-
-              <fieldset class="field" aria-describedby="ophaaldag-fout">
-                <legend>Op welke dag halen we op?</legend>
-                <div class="choices">
-                  <label class="choice"><input type="radio" name="ophaaldag" value="maandag"><span>Maandag</span></label>
-                  <label class="choice"><input type="radio" name="ophaaldag" value="dinsdag"><span>Dinsdag</span></label>
-                  <label class="choice"><input type="radio" name="ophaaldag" value="woensdag"><span>Woensdag</span></label>
-                  <label class="choice"><input type="radio" name="ophaaldag" value="donderdag"><span>Donderdag</span></label>
-                  <label class="choice"><input type="radio" name="ophaaldag" value="vrijdag"><span>Vrijdag</span></label>
-                  <label class="choice"><input type="radio" name="ophaaldag" value="zaterdag"><span>Zaterdag</span></label>
-                </div>
-                <p class="field__error" id="ophaaldag-fout" aria-live="polite"></p>
-              </fieldset>
-
-              <fieldset class="field" aria-describedby="brengdag-fout">
-                <legend>Op welke dag brengen we je was terug?</legend>
-                <div class="choices">
-                  <label class="choice"><input type="radio" name="brengdag" value="maandag"><span>Maandag</span></label>
-                  <label class="choice"><input type="radio" name="brengdag" value="dinsdag"><span>Dinsdag</span></label>
-                  <label class="choice"><input type="radio" name="brengdag" value="woensdag"><span>Woensdag</span></label>
-                  <label class="choice"><input type="radio" name="brengdag" value="donderdag"><span>Donderdag</span></label>
-                  <label class="choice"><input type="radio" name="brengdag" value="vrijdag"><span>Vrijdag</span></label>
-                  <label class="choice"><input type="radio" name="brengdag" value="zaterdag"><span>Zaterdag</span></label>
-                </div>
-                <p class="field__error" id="brengdag-fout" aria-live="polite"></p>
-              </fieldset>
-
-              <fieldset class="field" aria-describedby="brengdagdeel-hint brengdagdeel-fout">
-                <legend>In welk dagdeel brengen we hem terug?</legend>
-                <div class="choices">
-                  <label class="choice"><input type="radio" name="brengdagdeel" value="ochtend"><span>Ochtend</span></label>
-                  <label class="choice"><input type="radio" name="brengdagdeel" value="middag"><span>Middag</span></label>
-                  <label class="choice"><input type="radio" name="brengdagdeel" value="avond"><span>Avond</span></label>
-                </div>
-                <p class="field__hint" id="brengdagdeel-hint">Tijden: <span class="placeholder">[PLACEHOLDER: tijdvakken per dagdeel]</span></p>
-                <p class="field__error" id="brengdagdeel-fout" aria-live="polite"></p>
-              </fieldset>
-
-              <div class="save-row">
-                <button class="btn btn--primary" type="submit">Planning opslaan</button>
-                <p class="save-status" id="planning-status" role="status"></p>
-              </div>
-            </form>
-          </section>
-
           <!-- Huis -->
           <section class="panel" aria-labelledby="huis-titel">
             <h2 class="panel__title" id="huis-titel">Huis</h2>
@@ -235,7 +184,7 @@
     <div class="container site-footer__inner">
       <div>
         <p class="wordmark">De Witwasser</p>
-        <p class="site-footer__text">Wat we met je gegevens doen: <span class="placeholder">[PLACEHOLDER: privacyverklaring]</span></p>
+        <p class="site-footer__text">Wat we met je gegevens doen: niets. Dit is een studentenconcept. In de demo-modus blijft alles in je eigen browser en gaat er niets naar een server.</p>
       </div>
       <div class="site-footer__meta">
         <p>Een studentenconcept voor het vak Bedrijfskunde aan de Hanzehogeschool Groningen. Er worden geen betalingen verwerkt.</p>

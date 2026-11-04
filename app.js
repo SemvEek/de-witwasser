@@ -201,13 +201,6 @@
     return !tekst;
   }
 
-  function groepFout(form, naam, tekst) {
-    var el = $(naam + '-fout');
-    if (el) el.textContent = tekst || '';
-    form.elements[naam][0].closest('fieldset').setAttribute('data-invalid', tekst ? 'true' : 'false');
-    return !tekst;
-  }
-
   function focusEersteFout(form) {
     var veld = form.querySelector('[aria-invalid="true"], fieldset[data-invalid="true"] input');
     if (veld) veld.focus();
@@ -490,6 +483,17 @@
 
     koppelFormulieren();
 
+    document.addEventListener('witwasser:geboekt', function (e) {
+      if (!profiel) return;
+      var b = e.detail;
+      bewaar({
+        frequentie: b.abonnement ? 'elke week' : 'los',
+        ophaaldag: b.ophaaldag,
+        brengdag: b.brengdag,
+        brengdagdeel: b.brengUur < 13 ? 'ochtend' : b.brengUur < 17 ? 'middag' : 'avond'
+      }).catch(function (err) { console.warn('Planning niet opgeslagen:', err); });
+    });
+
     db.auth.getSession().then(function (r) {
       var sessie = r.data && r.data.session;
       if (!sessie) { window.location.replace('inloggen.html'); return null; }
@@ -536,18 +540,7 @@
       });
   }
 
-  function zetKeuze(form, naam, waarde) {
-    Array.prototype.forEach.call(form.elements[naam], function (radio) {
-      radio.checked = radio.value === waarde;
-    });
-  }
-
   function vulFormulieren() {
-    var planning = $('form-planning');
-    zetKeuze(planning, 'frequentie', profiel.frequentie);
-    zetKeuze(planning, 'ophaaldag', profiel.ophaaldag);
-    zetKeuze(planning, 'brengdag', profiel.brengdag);
-    zetKeuze(planning, 'brengdagdeel', profiel.brengdagdeel);
     $('studenten').value = profiel.studenten_in_huis || '';
     $('naam').value = profiel.naam || '';
     $('straat').value = profiel.straat || '';
@@ -559,7 +552,7 @@
   function overzichtTekst(p) {
     if (p.status === 'opgezegd') return 'Je hebt opgezegd op ' + datumLang(p.opgezegd_op) + '. We halen niets meer op.';
     if (p.status === 'gepauzeerd') return 'Je account staat op pauze tot en met ' + datumLang(p.gepauzeerd_tot) + '. Daarna halen we weer op zoals gepland.';
-    if (!p.frequentie || !p.ophaaldag) return 'Je hebt nog geen planning. Kies hieronder hoe vaak en op welke dag we je was ophalen.';
+    if (!p.frequentie || !p.ophaaldag) return 'Je hebt nog geen planning. Plan hieronder je eerste wasbeurt.';
     var zin = p.frequentie === 'los'
       ? 'Je hebt gekozen voor losse ophaling, op ' + p.ophaaldag
       : 'We halen je was ' + p.frequentie + ' op ' + p.ophaaldag + ' op';
@@ -567,7 +560,7 @@
       var dagdeel = { ochtend: '’s ochtends', middag: '’s middags', avond: '’s avonds' }[p.brengdagdeel];
       zin += ' en brengen hem terug op ' + p.brengdag + (dagdeel ? ' ' + dagdeel : '') + '.';
     } else {
-      zin += '. Kies hieronder nog wanneer we hem terugbrengen.';
+      zin += '. Plan hieronder wanneer we hem terugbrengen.';
     }
     return zin;
   }
@@ -581,7 +574,10 @@
     label.className = 'status-pill status-pill--' + p.status;
 
     $('overzicht').textContent = overzichtTekst(p);
-    $('overzicht-los').hidden = !(p.status === 'actief' && p.frequentie === 'los');
+    $('planning-opgezegd').hidden = p.status !== 'opgezegd';
+    document.querySelector('[data-planner]').hidden = p.status === 'opgezegd';
+    /* Naam, adres en abonnement doorgeven aan de planner */
+    document.dispatchEvent(new CustomEvent('witwasser:profiel', { detail: Object.assign({}, p) }));
 
     var ontbreekt = [];
     if (!p.straat || !p.huisnummer || !p.postcode) ontbreekt.push('je adres');
@@ -619,28 +615,6 @@
   }
 
   function koppelFormulieren() {
-    var planning = $('form-planning');
-    ['frequentie', 'ophaaldag', 'brengdag', 'brengdagdeel'].forEach(function (naam) {
-      Array.prototype.forEach.call(planning.elements[naam], function (radio) {
-        radio.addEventListener('change', function () { groepFout(planning, naam, ''); });
-      });
-    });
-    planning.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var el = planning.elements;
-      var ok = groepFout(planning, 'frequentie', el.frequentie.value ? '' : 'Kies hoe vaak we ophalen.');
-      ok = groepFout(planning, 'ophaaldag', el.ophaaldag.value ? '' : 'Kies een ophaaldag.') && ok;
-      ok = groepFout(planning, 'brengdag', el.brengdag.value ? '' : 'Kies een dag waarop we terugbrengen.') && ok;
-      ok = groepFout(planning, 'brengdagdeel', el.brengdagdeel.value ? '' : 'Kies een dagdeel.') && ok;
-      if (!ok) { focusEersteFout(planning); return; }
-      opslaan(planning.querySelector('[type="submit"]'), $('planning-status'), {
-        frequentie: el.frequentie.value,
-        ophaaldag: el.ophaaldag.value,
-        brengdag: el.brengdag.value,
-        brengdagdeel: el.brengdagdeel.value
-      }, 'Planning opgeslagen.');
-    });
-
     var huis = $('form-huis');
     huis.addEventListener('submit', function (e) {
       e.preventDefault();

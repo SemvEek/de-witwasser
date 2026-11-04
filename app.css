@@ -222,6 +222,23 @@ code {
 
 .btn[disabled] { opacity: 0.55; cursor: not-allowed; transform: none; }
 
+/* Planning in je account: de planner uit plannen.css, over de volle breedte */
+.account-planning { margin-top: clamp(2rem, 1.5rem + 2vw, 3rem); }
+.account-planning > * + * { margin-top: 0.75rem; }
+.account-planning__title { font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem); }
+.account-planning__title:focus { outline: none; }
+
+/* Keuzes die niet kunnen, bijvoorbeeld een terugbrengdag te dicht op de ophaaldag */
+.choice:has(input:disabled) { cursor: not-allowed; }
+.choice input:disabled + span {
+  border-style: dashed;
+  border-color: rgba(31, 41, 55, 0.25);
+  background: transparent;
+  color: #9AA1AC;
+  text-decoration: line-through;
+}
+.choice:active input:disabled + span { transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .tabs__tab, .tabs__tab:active { transform: none; transition: background-color 120ms ease; }
 }
